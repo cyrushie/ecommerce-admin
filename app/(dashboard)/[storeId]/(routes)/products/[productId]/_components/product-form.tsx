@@ -302,7 +302,10 @@ const ProductForm = ({
                     <SelectContent>
                       {categories.map((category) => {
                         return (
-                          <SelectItem value={category.id}>
+                          <SelectItem
+                            key={category.id}
+                            value={category.id}
+                          >
                             {category.name}
                           </SelectItem>
                         );
@@ -336,7 +339,12 @@ const ProductForm = ({
                     <SelectContent>
                       {sizes.map((size) => {
                         return (
-                          <SelectItem value={size.id}>{size.name}</SelectItem>
+                          <SelectItem
+                            key={size.id}
+                            value={size.id}
+                          >
+                            {size.name}
+                          </SelectItem>
                         );
                       })}
                     </SelectContent>
@@ -368,7 +376,12 @@ const ProductForm = ({
                     <SelectContent>
                       {colors.map((color) => {
                         return (
-                          <SelectItem value={color.id}>{color.name}</SelectItem>
+                          <SelectItem
+                            key={color.id}
+                            value={color.id}
+                          >
+                            {color.name}
+                          </SelectItem>
                         );
                       })}
                     </SelectContent>

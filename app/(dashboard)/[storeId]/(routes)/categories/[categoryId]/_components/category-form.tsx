@@ -209,7 +209,10 @@ const CategoryForm = ({ initialValue, billboards }: CategoryFormProps) => {
                     <SelectContent>
                       {billboards.map((billboard) => {
                         return (
-                          <SelectItem value={billboard.id}>
+                          <SelectItem
+                            key={billboard.id}
+                            value={billboard.id}
+                          >
                             {billboard.label}
                           </SelectItem>
                         );
