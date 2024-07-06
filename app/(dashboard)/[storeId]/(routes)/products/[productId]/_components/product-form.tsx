@@ -55,8 +55,18 @@ const editSchema = z.object({
   colorId: z.string().min(1),
   isArchived: z.boolean().default(false).optional(),
   isFeatured: z.boolean().default(false).optional(),
-  images: z.object({ imageUrl: z.string().min(1) }).array(),
+  images: z
+    .array(
+      z.object({
+        imageUrl: z.string().min(1),
+      })
+    )
+    .or(z.any()),
 });
+
+interface ImageUrl {
+  imageUrl: string;
+}
 
 interface ProductFormProps {
   initialValue:
@@ -91,7 +101,10 @@ const ProductForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialValue
-      ? { ...initialValue, price: initialValue.price as unknown as number }
+      ? {
+          ...initialValue,
+          price: parseFloat(String(initialValue?.price)),
+        }
       : {
           name: "",
           price: 0,
@@ -105,16 +118,14 @@ const ProductForm = ({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (initialValue && !values?.images.length && initialValue.images.length) {
-      values = {
-        ...values,
-        images: [
-          ...initialValue.images.map((image) => ({
-            imageUrl: image.imageUrl,
-          })),
-        ],
-      };
-    }
+    values = {
+      ...values,
+      images: [
+        ...values.images
+          .map((image: ImageUrl) => ({ imageUrl: image.imageUrl }))
+          .filter((image: ImageUrl) => image.imageUrl !== ""),
+      ],
+    };
 
     try {
       setLoading(true);
@@ -170,7 +181,6 @@ const ProductForm = ({
       );
 
       if (!response.ok) {
-        console.log(response);
         toast.error(`Error with status code: ${response.status}`);
         return;
       }
@@ -224,14 +234,16 @@ const ProductForm = ({
                 <FormLabel>Images</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={[...field?.value.map((image) => image.imageUrl)]}
+                    value={[
+                      ...field?.value.map((image: ImageUrl) => image.imageUrl),
+                    ]}
                     onChange={(url) => {
                       field.onChange([...field?.value, { imageUrl: url }]);
                     }}
                     onRemove={(url) =>
                       field.onChange([
                         ...field?.value.filter(
-                          (image) => image.imageUrl !== url
+                          (image: ImageUrl) => image?.imageUrl !== url
                         ),
                       ])
                     }
