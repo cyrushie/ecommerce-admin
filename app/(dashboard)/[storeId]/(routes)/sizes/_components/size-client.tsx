@@ -4,22 +4,22 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { Billboard } from "@prisma/client";
 import { Plus } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { columns } from "./column";
 import { ApiList } from "@/components/ui/api-list";
 
-interface BillboardClientProps {
+interface SizeClientProps {
   data: {
-    label: string;
+    name: string;
+    value: string;
     id: string;
     createdAt: string;
   }[];
 }
 
-export const BillboardClient = ({ data }: BillboardClientProps) => {
+export const SizeClient = ({ data }: SizeClientProps) => {
   const router = useRouter();
   const params = useParams<{ storeId: string }>();
 
@@ -27,12 +27,10 @@ export const BillboardClient = ({ data }: BillboardClientProps) => {
     <>
       <div className="flex items-center justify-between">
         <Heading
-          title={`Billboards (${data.length})`}
-          description="Manage your billboards"
+          title={`Sizes (${data.length})`}
+          description="Manage your sizes"
         />
-        <Button
-          onClick={() => router.push(`/${params.storeId}/billboards/new`)}
-        >
+        <Button onClick={() => router.push(`/${params.storeId}/sizes/new`)}>
           <Plus className="mr-2 h-4 w-4" />
           Add new
         </Button>
@@ -41,16 +39,16 @@ export const BillboardClient = ({ data }: BillboardClientProps) => {
       <DataTable
         columns={columns}
         data={data}
-        filterKey="label"
+        filterKey="name"
       />
       <Separator />
       <Heading
         title="APIs"
-        description="API calls for billboard"
+        description="API calls for sizes"
       />
       <ApiList
-        entityIdName="billboardId"
-        entityName="billboards"
+        entityIdName="sizeId"
+        entityName="sizes"
       />
     </>
   );

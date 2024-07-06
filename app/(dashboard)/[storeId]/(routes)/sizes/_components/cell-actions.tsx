@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BillboardColumnProps } from "./column";
+import { SizeColumnProps } from "./column";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +12,12 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Copy, Edit, Edit2, MoreHorizontal, Trash2 } from "lucide-react";
+import { Copy, Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modal/alert-modal";
 
-export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
+export const CellActions = ({ data }: { data: SizeColumnProps }) => {
   const router = useRouter();
   const params = useParams<{ storeId: string }>();
   const [loading, setLoading] = useState(false);
@@ -31,12 +31,9 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/${params.storeId}/billboards/${data.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`/api/${params.storeId}/sizes/${data.id}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         console.log(response);
@@ -45,11 +42,9 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
       }
 
       router.refresh();
-      toast.success("Store deleted");
+      toast.success("Size deleted");
     } catch (error) {
-      toast.error(
-        "Make sure you deleted all categories related to this billboard"
-      );
+      toast.error("Make sure you deleted all products related to this size");
     } finally {
       setLoading(false);
     }
@@ -58,8 +53,8 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
   return (
     <>
       <AlertModal
-        title="Delete billboard"
-        description="Deleting the billboard will never get it back"
+        title="Delete size"
+        description="Deleting the size will never get it back"
         onClose={() => setOpen(false)}
         onConfirm={() => onDelete()}
         isOpen={open}
@@ -84,9 +79,7 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
               Copy ID
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() =>
-                router.push(`/${params.storeId}/billboards/${data.id}`)
-              }
+              onClick={() => router.push(`/${params.storeId}/sizes/${data.id}`)}
             >
               <Edit className="h-4 w-4 mr-2" />
               Edit

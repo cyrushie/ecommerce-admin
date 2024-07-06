@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertModal } from "@/components/modal/alert-modal";
-import { ApiAlert } from "@/components/ui/api-alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,9 +14,8 @@ import { Heading } from "@/components/ui/heading";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useOrigin } from "@/hooks/use-origin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Billboard, Store } from "@prisma/client";
+import { Size } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -25,55 +23,40 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
-const addSchema = z.object({
-  label: z.string().min(1, { message: "Name must be at least 1 character" }),
-  imageUrl: z.string().min(1, { message: "Image URL is required" }),
+const formSchema = z.object({
+  name: z.string().min(1, { message: "Name must be at least 1 character" }),
+  value: z.string().min(1, { message: "Value is required" }),
 });
 
-const editSchema = z.object({
-  label: z.string().min(1, { message: "Name must be at least 1 character" }),
-  imageUrl: z.string().optional(),
-});
-
-interface BillboardFormProps {
-  initialValue: Billboard | null;
+interface SizeFormProps {
+  initialValue: Size | null;
 }
 
-const BillboardForm = ({ initialValue }: BillboardFormProps) => {
+const SizeForm = ({ initialValue }: SizeFormProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const params = useParams<{ storeId: string }>();
 
-  const title = initialValue ? "Edit billboard" : "Create billboard";
-  const description = initialValue
-    ? "Edit your billboard"
-    : "Create a new billboard";
-  const action = initialValue ? "Save changes" : "Create";
-  const toastMessage = initialValue ? "Changes saved" : "Billboard created";
-  const formSchema = initialValue ? editSchema : addSchema;
+  const title = initialValue ? "Edit size" : "Create size";
+  const description = initialValue ? "Edit your size" : "Create a new size";
+  const action = initialValue ? "Save" : "Create";
+  const toastMessage = initialValue ? "Size updated" : "Size created";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialValue || {
-      label: "",
-      imageUrl: "",
+      name: "",
+      value: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (initialValue && !values.imageUrl && initialValue.imageUrl) {
-      values = {
-        ...values,
-        imageUrl: initialValue.imageUrl,
-      };
-    }
-
     try {
       setLoading(true);
       if (initialValue) {
         const response = await fetch(
-          `/api/${params.storeId}/billboards/${initialValue.id}`,
+          `/api/${params.storeId}/sizes/${initialValue.id}`,
           {
             method: "PATCH",
             headers: {
@@ -88,7 +71,7 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
           return;
         }
       } else {
-        const response = await fetch(`/api/${params.storeId}/billboards`, {
+        const response = await fetch(`/api/${params.storeId}/sizes`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -103,7 +86,7 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
       }
 
       toast.success(toastMessage);
-      router.push(`/${params.storeId}/billboards`);
+      router.push(`/${params.storeId}/sizes`);
       router.refresh();
     } catch (error) {
       toast.error("Something went wrong.");
@@ -116,7 +99,7 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/${params.storeId}/billboards/${initialValue?.id}`,
+        `/api/${params.storeId}/sizes/${initialValue?.id}`,
         {
           method: "DELETE",
         }
@@ -128,13 +111,11 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
         return;
       }
 
-      toast.success("Billnoard deleted");
-      router.push(`/${params.storeId}/billboards`);
+      toast.success("Size deleted");
+      router.push(`/${params.storeId}/sizes`);
       router.refresh();
     } catch (error) {
-      toast.error(
-        "Make sure you deleted all categories related to this billboard"
-      );
+      toast.error("Make sure you deleted all categories related to this size");
     } finally {
       setLoading(false);
     }
@@ -143,8 +124,8 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
   return (
     <>
       <AlertModal
-        title="Delete billboard"
-        description="Deleting the billboard will never get it back"
+        title="Delete size"
+        description="Deleting the size will never get it back"
         onClose={() => setOpen(false)}
         onConfirm={() => onDelete()}
         isOpen={open}
@@ -171,35 +152,35 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6"
         >
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Background Image</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value ? [field.value] : []}
-                    onChange={(url) => field.onChange(url)}
-                    onRemove={(url) => field.onChange("")}
-                    disabled={loading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <div className="grid grid-cols-3 gap-8 ">
             <FormField
               control={form.control}
-              name="label"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Label</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="billboard label"
+                      placeholder="Size name"
+                      type="text"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="value"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Size value"
                       type="text"
                       {...field}
                     />
@@ -223,4 +204,4 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
   );
 };
 
-export default BillboardForm;
+export default SizeForm;

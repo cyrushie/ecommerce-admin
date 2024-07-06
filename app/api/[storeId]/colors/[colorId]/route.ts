@@ -5,44 +5,44 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { billboardId: string } }
+  { params }: { params: { colorId: string } }
 ) {
   try {
-    const billboard = await db.billboard.findUnique({
+    const color = await db.color.findUnique({
       where: {
-        id: params.billboardId,
+        id: params.colorId,
       },
     });
 
-    return NextResponse.json(billboard);
+    return NextResponse.json(color);
   } catch (error) {
-    console.log("[BILLBOARDS_GET]", error);
+    console.log("[COLORS_GET]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { storeId: string; billboardId: string } }
+  { params }: { params: { storeId: string; colorId: string } }
 ) {
   try {
     const { userId } = auth();
-    const { label, imageUrl } = await req.json();
+    const { name, value } = await req.json();
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
 
-    if (!label) {
-      return new NextResponse("Label is required", { status: 400 });
+    if (!name) {
+      return new NextResponse("Name is required", { status: 400 });
     }
 
-    if (!imageUrl) {
-      return new NextResponse("image URL is required", { status: 400 });
+    if (!value) {
+      return new NextResponse("Value is required", { status: 400 });
     }
 
     if (!params.storeId) {
-      return new NextResponse("store id is required", { status: 400 });
+      return new NextResponse("Store Id is required", { status: 400 });
     }
 
     const storeByUserId = await db.store.findFirst({
@@ -56,27 +56,27 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    const billboard = await db.billboard.update({
+    const color = await db.color.update({
       where: {
-        id: params.billboardId,
+        id: params.colorId,
         storeId: params.storeId,
       },
       data: {
-        label,
-        imageUrl,
+        name,
+        value,
       },
     });
 
-    return NextResponse.json(billboard);
+    return NextResponse.json(color);
   } catch (error) {
-    console.log("[BILLBOARDS_PATCH]", error);
+    console.log("[COLORS_PATCH]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { storeId: string; billboardId: string } }
+  { params }: { params: { storeId: string; colorId: string } }
 ) {
   try {
     const { userId } = auth();
@@ -86,7 +86,7 @@ export async function DELETE(
     }
 
     if (!params.storeId) {
-      return new NextResponse("store id is required", { status: 400 });
+      return new NextResponse("Store ID is required", { status: 400 });
     }
 
     const storeByUserId = await db.store.findFirst({
@@ -100,16 +100,16 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    const billboard = await db.billboard.delete({
+    const color = await db.color.delete({
       where: {
-        id: params.billboardId,
+        id: params.colorId,
         storeId: params.storeId,
       },
     });
 
-    return NextResponse.json(billboard);
+    return NextResponse.json(color);
   } catch (error) {
-    console.log("[BILLBOARDS_DELETE]", error);
+    console.log("[COLORS_DELETE]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

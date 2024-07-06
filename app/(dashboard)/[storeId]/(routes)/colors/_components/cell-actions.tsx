@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BillboardColumnProps } from "./column";
+import { ColorColumnProps } from "./column";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modal/alert-modal";
 
-export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
+export const CellActions = ({ data }: { data: ColorColumnProps }) => {
   const router = useRouter();
   const params = useParams<{ storeId: string }>();
   const [loading, setLoading] = useState(false);
@@ -31,12 +31,9 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/${params.storeId}/billboards/${data.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`/api/${params.storeId}/colors/${data.id}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         console.log(response);
@@ -45,11 +42,9 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
       }
 
       router.refresh();
-      toast.success("Billboard deleted");
+      toast.success("Color deleted");
     } catch (error) {
-      toast.error(
-        "Make sure you deleted all categories related to this billboard"
-      );
+      toast.error("Make sure you deleted all products related to this color");
     } finally {
       setLoading(false);
     }
@@ -58,8 +53,8 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
   return (
     <>
       <AlertModal
-        title="Delete billboard"
-        description="Deleting the billboard will never get it back"
+        title="Delete color"
+        description="Deleting the color will never get it back"
         onClose={() => setOpen(false)}
         onConfirm={() => onDelete()}
         isOpen={open}
@@ -85,7 +80,7 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>
-                router.push(`/${params.storeId}/billboards/${data.id}`)
+                router.push(`/${params.storeId}/colors/${data.id}`)
               }
             >
               <Edit className="h-4 w-4 mr-2" />

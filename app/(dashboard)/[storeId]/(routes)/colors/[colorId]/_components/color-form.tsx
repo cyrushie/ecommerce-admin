@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertModal } from "@/components/modal/alert-modal";
-import { ApiAlert } from "@/components/ui/api-alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,9 +14,8 @@ import { Heading } from "@/components/ui/heading";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useOrigin } from "@/hooks/use-origin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Billboard, Store } from "@prisma/client";
+import { Color } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,32 +24,30 @@ import toast from "react-hot-toast";
 import { z } from "zod";
 
 const formSchema = z.object({
-  label: z.string().min(1, { message: "Name must be at least 1 character" }),
-  imageUrl: z.string().min(1, { message: "Image URL is required" }),
+  name: z.string().min(1, { message: "Name must be at least 1 character" }),
+  value: z.string().min(1, { message: "Value is required" }),
 });
 
-interface BillboardFormProps {
-  initialValue: Billboard | null;
+interface ColorFormProps {
+  initialValue: Color | null;
 }
 
-const BillboardForm = ({ initialValue }: BillboardFormProps) => {
+const ColorForm = ({ initialValue }: ColorFormProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const params = useParams<{ storeId: string }>();
 
-  const title = initialValue ? "Edit billboard" : "Create billboard";
-  const description = initialValue
-    ? "Edit your billboard"
-    : "Create a new billboard";
-  const action = initialValue ? "Save changes" : "Create";
-  const toastMessage = initialValue ? "Changes saved" : "Billboard created";
+  const title = initialValue ? "Edit color" : "Create color";
+  const description = initialValue ? "Edit your color" : "Create a new color";
+  const action = initialValue ? "Save" : "Create";
+  const toastMessage = initialValue ? "Color updated" : "Color created";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialValue || {
-      label: "",
-      imageUrl: "",
+      name: "",
+      value: "",
     },
   });
 
@@ -60,7 +56,7 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
       setLoading(true);
       if (initialValue) {
         const response = await fetch(
-          `/api/${params.storeId}/billboards/${initialValue.id}`,
+          `/api/${params.storeId}/colors/${initialValue.id}`,
           {
             method: "PATCH",
             headers: {
@@ -75,7 +71,7 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
           return;
         }
       } else {
-        const response = await fetch(`/api/${params.storeId}/billboards`, {
+        const response = await fetch(`/api/${params.storeId}/colors`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -90,7 +86,7 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
       }
 
       toast.success(toastMessage);
-      router.push(`/${params.storeId}/billboards`);
+      router.push(`/${params.storeId}/colors`);
       router.refresh();
     } catch (error) {
       toast.error("Something went wrong.");
@@ -103,7 +99,7 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/${params.storeId}/billboards/${initialValue?.id}`,
+        `/api/${params.storeId}/colors/${initialValue?.id}`,
         {
           method: "DELETE",
         }
@@ -115,13 +111,11 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
         return;
       }
 
-      toast.success("Store deleted");
+      toast.success("Colors deleted");
+      router.push(`/${params.storeId}/colors`);
       router.refresh();
-      router.push(`/${params.storeId}/billboards`);
     } catch (error) {
-      toast.error(
-        "Make sure you deleted all categories related to this billboard"
-      );
+      toast.error("Make sure you deleted all categories related to this color");
     } finally {
       setLoading(false);
     }
@@ -130,8 +124,8 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
   return (
     <>
       <AlertModal
-        title="Delete billboard"
-        description="Deleting the billboard will never get it back"
+        title="Delete color"
+        description="Deleting the color will never get it back"
         onClose={() => setOpen(false)}
         onConfirm={() => onDelete()}
         isOpen={open}
@@ -158,38 +152,44 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6"
         >
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Background Image</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value ? [field.value] : []}
-                    onChange={(url) => field.onChange(url)}
-                    onRemove={(url) => field.onChange("")}
-                    disabled={loading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <div className="grid grid-cols-3 gap-8 ">
             <FormField
               control={form.control}
-              name="label"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Label</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="billboard label"
+                      placeholder="Color name"
                       type="text"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="value"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Value</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        disabled={loading}
+                        placeholder="Color value"
+                        type="text"
+                        {...field}
+                      />
+                      <div
+                        className="p-4 rounded-full border"
+                        style={{ backgroundColor: field.value }}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,4 +210,4 @@ const BillboardForm = ({ initialValue }: BillboardFormProps) => {
   );
 };
 
-export default BillboardForm;
+export default ColorForm;

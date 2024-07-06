@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BillboardColumnProps } from "./column";
+import { ProductColumnProps } from "./column";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modal/alert-modal";
 
-export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
+export const CellActions = ({ data }: { data: ProductColumnProps }) => {
   const router = useRouter();
   const params = useParams<{ storeId: string }>();
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/${params.storeId}/billboards/${data.id}`,
+        `/api/${params.storeId}/products/${data.id}`,
         {
           method: "DELETE",
         }
@@ -45,11 +45,9 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
       }
 
       router.refresh();
-      toast.success("Billboard deleted");
+      toast.success("Product deleted");
     } catch (error) {
-      toast.error(
-        "Make sure you deleted all categories related to this billboard"
-      );
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -58,8 +56,8 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
   return (
     <>
       <AlertModal
-        title="Delete billboard"
-        description="Deleting the billboard will never get it back"
+        title="Delete product"
+        description="Deleting the product will never get it back"
         onClose={() => setOpen(false)}
         onConfirm={() => onDelete()}
         isOpen={open}
@@ -85,7 +83,7 @@ export const CellActions = ({ data }: { data: BillboardColumnProps }) => {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>
-                router.push(`/${params.storeId}/billboards/${data.id}`)
+                router.push(`/${params.storeId}/products/${data.id}`)
               }
             >
               <Edit className="h-4 w-4 mr-2" />
